@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Team Copier</title>
+  <style>
+    :root {
+      --bg: #1e1e2e;
+      --card-bg: #282a36;
+      --border: #44475a;
+      --text: #f8f8f2;
+      --accent: #bd93f9;
+      --green: #50fa7b;
+      --cyan: #8be9fd;
+      --yellow: #f1fa8c;
+    }
+    body {
+      margin: 0;
+      padding: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 14px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .btn {
+      background: var(--accent);
+      color: #282a36;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+    .btn.copied {
+      background: var(--green);
+      color: #1e1e2e;
+    }
+    .btn-all {
+      grid-column: 1 / -1;
+      background: var(--cyan);
+      color: #1e1e2e;
+      margin-top: 4px;
+    }
+    .preview {
+      font-family: monospace;
+      font-size: 10px;
+      color: #b0b0c0;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 6px;
+      border-radius: 4px;
+      max-height: 48px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: pre-wrap;
+    }
+    .toast {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: #1e1e2e;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>⚡ AI Team 원클릭 복사기</h2>
+    <span style="font-size: 10px; color: #888;">Live Sync</span>
+  </div>
+
+  <div class="grid">
+    <!-- OpenCode -->
+    <div class="card">
+      <div class="card-title" style="color: var(--cyan);">
+        <span>🔨 OpenCode (구현)</span>
+        <span class="tag">w1:p1</span>
+      </div>
+      <div class="preview" id="preview-opencode">로딩 중...</div>
+      <button class="btn" onclick="copyAgent('opencode', this)">📋 답변 복사</button>
+    </div>
+
+    <!-- Aside -->
+    <div class="card">
+      <div class="card-title" style="color: var(--yellow);">
+        <span>🌐 Aside (브라우저)</span>
+        <span class="tag">w1:p2</span>
+      </div>
+      <div class="preview" id="preview-aside">로딩 중...</div>
+      <button class="btn" onclick="copyAgent('aside', this)">📋 답변 복사</button>
+    </div>
+
+    <!-- Codex -->
+    <div class="card">
+      <div class="card-title" style="color: var(--green);">
+        <span>🧪 Codex (테스트)</span>
+        <span class="tag">w1:p3</span>
+      </div>
+      <div class="preview" id="preview-codex">로딩 중...</div>
+      <button class="btn" onclick="copyAgent('codex', this)">📋 답변 복사</button>
+    </div>
+
+    <!-- Antigravity -->
+    <div class="card">
+      <div class="card-title" style="color: var(--accent);">
+        <span>📐 Antigravity (기획)</span>
+        <span class="tag">w1:p4</span>
+      </div>
+      <div class="preview" id="preview-agy">로딩 중...</div>
+      <button class="btn" onclick="copyAgent('agy', this)">📋 답변 복사</button>
+    </div>
+
+    <!-- All in one -->
+    <button class="btn btn-all" onclick="copyAll(this)">📑 4개 에이전트 답변 전체 한 번에 복사</button>
+  </div>
+
+  <div id="toast" class="toast">클립보드에 복사되었습니다!</div>
+
+  <script>
+    async function fetchAgentData(target) {
+      const res = await fetch(`/api/read?target=${target}`);
+      const data = await res.json();
+      return data.text || '';
+    }
+
+    async function updatePreviews() {
+      ['opencode', 'aside', 'codex', 'agy'].forEach(async (target) => {
+        try {
+          const text = await fetchAgentData(target);
+          const el = document.getElementById(`preview-${target}`);
+          if (el) el.innerText = text.slice(-150).trim() || '(내용 없음)';
+        } catch(e) {}
+      });
+    }
+
+    async function copyAgent(target, btn) {
+      try {
+        const text = await fetchAgentData(target);
+        await navigator.clipboard.writeText(text);
+        showToast('클립보드에 복사되었습니다!');
+        btn.classList.add('copied');
+        btn.innerText = '✔ 복사 완료!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerText = '📋 답변 복사';
+        }, 1500);
+      } catch(e) {
+        showToast('복사 실패');
+      }
+    }
+
+    async function copyAll(btn) {
+      try {
+        const [opencode, aside, codex, agy] = await Promise.all([
+          fetchAgentData('opencode'),
+          fetchAgentData('aside'),
+          fetchAgentData('codex'),
+          fetchAgentData('agy'),
+        ]);
+
+        const full = `[1. Antigravity 기획]\n${agy}\n\n=========================\n[2. OpenCode 구현]\n${opencode}\n\n=========================\n[3. Aside 브라우저]\n${aside}\n\n=========================\n[4. Codex 테스트]\n${codex}`;
+
+        await navigator.clipboard.writeText(full);
+        showToast('4개 에이전트 전체 복사 완료!');
+        btn.classList.add('copied');
+        btn.innerText = '✔ 전체 복사 완료!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerText = '📑 4개 에이전트 답변 전체 한 번에 복사';
+        }, 1500);
+      } catch(e) {
+        showToast('복사 실패');
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    setInterval(updatePreviews, 3000);
+    updatePreviews();
+  </script>
+</body>
+</html>

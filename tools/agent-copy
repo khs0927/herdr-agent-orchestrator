@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+TARGET="${1:-all}"
+case "$TARGET" in
+  opencode|w1:p1) herdr pane read "w1:p1" --lines 60 | pbcopy; echo "✔ OpenCode 답변이 클립보드에 복사되었습니다." ;;
+  aside|w1:p2)    herdr pane read "w1:p2" --lines 60 | pbcopy; echo "✔ Aside 브라우저 답변이 클립보드에 복사되었습니다." ;;
+  codex|w1:p3)    herdr pane read "w1:p3" --lines 60 | pbcopy; echo "✔ Codex 답변이 클립보드에 복사되었습니다." ;;
+  agy|w1:p4)      herdr pane read "w1:p4" --lines 60 | pbcopy; echo "✔ Antigravity 답변이 클립보드에 복사되었습니다." ;;
+  gui)            open "http://127.0.0.1:4789"; echo "✔ AI Team 복사기 GUI를 브라우저에 열었습니다." ;;
+  *)
+    (
+      echo "=== [1. Antigravity 기획] ==="
+      herdr pane read "w1:p4" --lines 40
+      echo -e "\n=== [2. OpenCode 구현] ==="
+      herdr pane read "w1:p1" --lines 40
+      echo -e "\n=== [3. Aside 브라우저] ==="
+      herdr pane read "w1:p2" --lines 40
+      echo -e "\n=== [4. Codex 테스트] ==="
+      herdr pane read "w1:p3" --lines 40
+    ) | pbcopy
+    echo "✔ 4개 에이전트 답변 전체가 클립보드에 복사되었습니다."
+    ;;
+esac

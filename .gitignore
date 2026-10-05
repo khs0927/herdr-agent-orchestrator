@@ -1,0 +1,25 @@
+# OS & Editor
+.DS_Store
+*.swp
+*~
+
+# Logs & Sockets
+*.log
+*.sock
+*.sock.*
+
+# Herdr session data & local state
+.plugins.lock
+session-snapshots/
+session.json
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/

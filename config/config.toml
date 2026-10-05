@@ -1,0 +1,23 @@
+onboarding = false
+
+[ui]
+mouse_capture = true
+copy_on_select = true
+mouse_scroll_lines = 3
+
+[theme.custom]
+# 안티그래비티 탭 및 관련 요소에 사용되는 기본 어두운 파란색(#89b4fa)을 코덱스처럼 밝은 하늘색(#89dceb)으로 변경
+blue = "#89dceb"
+
+[keys]
+# Ctrl+Y: 현재 보고 있는 창의 최근 답변을 즉시 클립보드에 복사
+[[keys.command]]
+key = "ctrl+y"
+type = "shell"
+command = "herdr pane read \"$(herdr api current-pane | jq -r .result.pane_id 2>/dev/null || echo w1:p1)\" --lines 50 | pbcopy"
+
+# Prefix (Ctrl+B) -> C: 4개 에이전트 전체 답변을 한 번에 복사
+[[keys.command]]
+key = "prefix+c"
+type = "shell"
+command = "agent-copy all"
